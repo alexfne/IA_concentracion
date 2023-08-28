@@ -1,3 +1,0 @@
-@echo off
-python C:\Users\alexf\OneDrive\Escritorio\Inteligencia artificial avanzada para la ciencia de datos\RETO\IA_concentracion\Modulo2\M2__retro.py
-pause
