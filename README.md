@@ -33,7 +33,7 @@ Este repositorio contiene una implementación y ejemplos de uso de árboles de d
 
 1. Clonar el repositorio:
    ```bash
-   git clone https://github.com/tu-usuario/proyecto-arboles-de-decision.git
+   git clone https://github.com/alexfne/IA_concentracion.git
 
 2. Numpy:
    ```bash
