@@ -57,6 +57,10 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
 5. Ingresa la ruta donde se guardaron los archivos csv + `/filename.csv` con el cual se haran las pruebas.
 6. Espera que el rpograma finalice
 
+## Código
+[Código en google colab]([URL](https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw?usp=sharing))
+
+
 ## Contribuciones
 
 ¡Las contribuciones son bienvenidas! Si encuentras algún error o tienes alguna mejora, siéntete libre de abrir un problema o enviar una solicitud de extracción.
