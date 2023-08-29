@@ -14,6 +14,7 @@
 - [Requisitos Previos](#requisitos-previos)
 - [Instalación](#instalación)
 - [Uso](#uso)
+- [GoogleColab](#googlecolab)
 - [Contribuciones](#contribuciones)
 
 ## Descripción
@@ -57,8 +58,8 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
 5. Ingresa la ruta donde se guardaron los archivos csv + `/filename.csv` con el cual se haran las pruebas.
 6. Espera que el rpograma finalice
 
-## Código
-[Código en google colab]([URL](https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw?usp=sharing))
+## Googlecolab
+[Código en google colab](https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw?usp=sharing)
 
 
 ## Contribuciones
