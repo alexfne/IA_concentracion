@@ -1,0 +1,245 @@
+# -*- coding: utf-8 -*-
+"""
+Original file is located at
+    https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw
+"""
+
+import numpy as np
+import pandas as pd
+
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+
+"""### Leer los datos"""
+
+filename = input('''Ingresa la ruta donde se encuentra el archivo + /filename.csv
+                 => ''')
+data = pd.read_csv(filename, skiprows=1, header=None)
+
+# Leer los títulos/nombres de las columnas
+col_names = list(data.columns)
+data.head(10)
+
+"""### Clase de nodos"""
+
+class Node():
+    def __init__(self, feature_index=None, threshold=None, left=None, right=None, info_gain=None, value=None):
+        ''' constructor '''
+        # NODO DE DECISION
+        # Condition
+        self.feature_index = feature_index
+        self.threshold = threshold
+        # Accesar a las ramas
+        self.left = left
+        self.right = right
+        # Guarda la informacion de la separacion de los datos
+        self.info_gain = info_gain
+
+        # NODO DE HOJA
+        self.value = value
+
+"""### Clase de Arbol"""
+
+class DecisionTreeClassifier():
+    def __init__(self, min_samples_split=2, max_depth=2):
+        ''' constructor '''
+
+        # INICIALIZA LA RUTA DEL ARBOL
+        self.root = None
+
+        # CONDICIONES DE PARO
+        self.min_samples_split = min_samples_split
+        self.max_depth = max_depth
+
+    def build_tree(self, dataset, curr_depth=0):
+        ''' recursive function to build the tree '''
+
+        X, Y = dataset[:,:-1], dataset[:,-1]
+        num_samples, num_features = np.shape(X)
+
+        # Separa hasta que las condiciones se cumplan
+        if num_samples>=self.min_samples_split and curr_depth<=self.max_depth:
+            # Encuentra la mejor fragmento
+            best_split = self.get_best_split(dataset, num_samples, num_features)
+            # Checa si la informacion es positiva
+            if best_split["info_gain"]>0:
+                # Izquierda
+                left_subtree = self.build_tree(best_split["dataset_left"], curr_depth+1)
+                # Derecha
+                right_subtree = self.build_tree(best_split["dataset_right"], curr_depth+1)
+                # Regresar decisiones para el NODO
+                return Node(best_split["feature_index"], best_split["threshold"],
+                            left_subtree, right_subtree, best_split["info_gain"])
+
+        # Computar NODO hoja
+        leaf_value = self.calculate_leaf_value(Y)
+        # Regresa NODO hoja
+        return Node(value=leaf_value)
+
+    def get_best_split(self, dataset, num_samples, num_features):
+        ''' function to find the best split '''
+
+        # Diccionario para guardar la mejor fragmento
+        best_split = {}
+        max_info_gain = -float("inf")
+
+        # Loop
+        for feature_index in range(num_features):
+            feature_values = dataset[:, feature_index]
+            possible_thresholds = np.unique(feature_values)
+            # loop over all the feature values present in the data
+            for threshold in possible_thresholds:
+                # Obten la fragmento actual
+                dataset_left, dataset_right = self.split(dataset, feature_index, threshold)
+                # Checa si los hijos no son NULOS
+                if len(dataset_left)>0 and len(dataset_right)>0:
+                    y, left_y, right_y = dataset[:, -1], dataset_left[:, -1], dataset_right[:, -1]
+                    # Computa informacion de ganancia
+                    curr_info_gain = self.information_gain(y, left_y, right_y, "gini")
+                    # Actualiza la mejor fragmento si es necesario
+                    if curr_info_gain>max_info_gain:
+                        best_split["feature_index"] = feature_index
+                        best_split["threshold"] = threshold
+                        best_split["dataset_left"] = dataset_left
+                        best_split["dataset_right"] = dataset_right
+                        best_split["info_gain"] = curr_info_gain
+                        max_info_gain = curr_info_gain
+
+        # Regresa la mejor fragmento
+        return best_split
+
+    def split(self, dataset, feature_index, threshold):
+        ''' function to split the data '''
+
+        dataset_left = np.array([row for row in dataset if row[feature_index]<=threshold])
+        dataset_right = np.array([row for row in dataset if row[feature_index]>threshold])
+        return dataset_left, dataset_right
+
+    def information_gain(self, parent, l_child, r_child, mode="entropy"):
+        ''' function to compute information gain '''
+
+        weight_l = len(l_child) / len(parent)
+        weight_r = len(r_child) / len(parent)
+        if mode=="gini":
+            gain = self.gini_index(parent) - (weight_l*self.gini_index(l_child) + weight_r*self.gini_index(r_child))
+        else:
+            gain = self.entropy(parent) - (weight_l*self.entropy(l_child) + weight_r*self.entropy(r_child))
+        return gain
+
+    def entropy(self, y):
+        ''' function to compute entropy '''
+
+        class_labels = np.unique(y)
+        entropy = 0
+        for cls in class_labels:
+            p_cls = len(y[y == cls]) / len(y)
+            entropy += -p_cls * np.log2(p_cls)
+        return entropy
+
+    def gini_index(self, y):
+        ''' function to compute gini index '''
+
+        class_labels = np.unique(y)
+        gini = 0
+        for cls in class_labels:
+            p_cls = len(y[y == cls]) / len(y)
+            gini += p_cls**2
+        return 1 - gini
+
+    def calculate_leaf_value(self, Y):
+        ''' function to compute leaf node '''
+
+        Y = list(Y)
+        return max(Y, key=Y.count)
+
+    def print_tree(self, tree=None, indent=" "):
+        ''' function to print the tree '''
+
+        if not tree:
+            tree = self.root
+
+        if tree.value is not None:
+            print(tree.value)
+
+        else:
+            print("X_"+str(tree.feature_index), "<=", tree.threshold, "?", tree.info_gain)
+            print("%sleft:" % (indent), end="")
+            self.print_tree(tree.left, indent + indent)
+            print("%sright:" % (indent), end="")
+            self.print_tree(tree.right, indent + indent)
+
+    def fit(self, X, Y):
+        ''' function to train the tree '''
+
+        dataset = np.concatenate((X, Y), axis=1)
+        self.root = self.build_tree(dataset)
+
+    def predict(self, X):
+        ''' function to predict new dataset '''
+
+        preditions = [self.make_prediction(x, self.root) for x in X]
+        return preditions
+
+    def make_prediction(self, x, tree):
+        ''' function to predict a single data point '''
+
+        if tree.value!=None: return tree.value
+        feature_val = x[tree.feature_index]
+        if feature_val<=tree.threshold:
+            return self.make_prediction(x, tree.left)
+        else:
+            return self.make_prediction(x, tree.right)
+
+"""### Train-Test"""
+
+X = data.iloc[:, :-1].values
+Y = data.iloc[:, -1].values.reshape(-1,1)
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=.2, random_state=41)
+
+"""### Fit el modelo"""
+
+classifier = DecisionTreeClassifier(min_samples_split=3, max_depth=3)
+classifier.fit(X_train,Y_train)
+classifier.print_tree()
+
+"""### Testear el modelo"""
+
+Y_pred = classifier.predict(X_test)
+from sklearn.metrics import accuracy_score
+print("Accuracy score: ", accuracy_score(Y_test, Y_pred))
+
+"""### Validación cruzada y rendimiento
+
+Realiza una validación cruzada de 5 pliegues en diferentes profundidades de árbol y muestra un gráfico de la precisión media en función de la profundidad del árbol. Se visualiza cómo cambia el rendimiento del modelo con diferentes profundidades para seleccionar la[texto del vínculo](https://) mejor.
+"""
+
+# Definir k-fold cross-validation
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+# Listas para almacenar resultados
+depths = list(range(1, 10))
+mean_accuracies = []
+
+# Probar diferentes profundidades del árbol
+for depth in depths:
+    fold_accuracies = []
+    for train_index, val_index in kf.split(X):
+        X_train_fold, X_val_fold = X[train_index], X[val_index]
+        Y_train_fold, Y_val_fold = Y[train_index], Y[val_index]
+
+        classifier = DecisionTreeClassifier(min_samples_split=3, max_depth=depth)
+        classifier.fit(X_train_fold, Y_train_fold)
+        Y_pred_fold = classifier.predict(X_val_fold)
+
+        fold_accuracies.append(accuracy_score(Y_val_fold, Y_pred_fold))
+
+    mean_accuracies.append(np.mean(fold_accuracies))
+
+# Gráfico de rendimiento en función de la profundidad del árbol
+plt.plot(depths, mean_accuracies)
+plt.xlabel('Depth of Tree')
+plt.ylabel('Mean Accuracy')
+plt.title('Performance vs Depth of Tree')
+plt.show()
