@@ -1,4 +1,4 @@
-<h1 align="center"> Módulo 2 - Aprendizaje máquina 🌳 Árboles de Decisión 🌳 </h1> 
+<h1 align="center"> Módulo 2 - ML 🌳 Árboles de Decisión 🌳 </h1> 
 
 <div align="center">
   
