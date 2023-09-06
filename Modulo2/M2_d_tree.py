@@ -21,9 +21,10 @@ Se lee un archivo CSV y se muestran las primeras 10 filas para tener una visión
 """
 
 # Leer los datos
-filename = input('''Ingresa la ruta donde se encuentra el archivo + /filename.csv
-                 => ''')
-
+'''
+filename = input(''Ingresa la ruta donde se encuentra el archivo + /filename.csv
+                 => '')
+'''
 # Cargar el archivo CSV, omitiendo la primera fila y sin encabezado
 data = pd.read_csv("iris.csv", skiprows=1, header=None)
 
@@ -352,7 +353,7 @@ plt.show()
 
 from sklearn.tree import export_graphviz
 import graphviz
-
+'''
 # Entrena un árbol de decisión usando sklearn
 from sklearn.tree import DecisionTreeClassifier as SkDecisionTreeClassifier
 
@@ -366,3 +367,4 @@ dot_data = export_graphviz(clf, out_file=None,
                            special_characters=True)
 graph = graphviz.Source(dot_data)
 graph.view()
+'''
