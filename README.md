@@ -58,6 +58,10 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
    ```bash
    pip install scikit-learn
 
+6. Matplot:
+   ```bash
+   pip install matplotlib
+
 ## Uso
 
 1. Clona el repositorio de github.
