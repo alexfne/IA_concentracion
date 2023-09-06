@@ -9,6 +9,7 @@
 
 ## Tabla de Contenidos
 
+- [Carpetas](#carpetas)
 - [Descripción](#descripción)
 - [Características](#características)
 - [Requisitos Previos](#requisitos-previos)
@@ -16,6 +17,11 @@
 - [Uso](#uso)
 - [GoogleColab](#googlecolab)
 - [Contribuciones](#contribuciones)
+
+## Carpetas
+
+- `Modulo2_con_FW`: Carpeta que contiene el programa de python y los documentos csv que se utilizan para demostrar el aprendizaje máquina con uso de librerias
+- `Modulo2_sin_FW`: Carpeta que contiene el programa de python y los documentos csv que se utilizan para demostrar el aprendizaje máquina sin el uso de librerias
 
 ## Descripción
 
@@ -29,7 +35,10 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
 ## Requisitos Previos
 
 - Python 3.8+
-- Librerías: numpy, pandas, scikit-learn
+- Librerías:
+    - numpy
+    - pandas
+    - scikit-learn
 
 ## Instalación
 
@@ -54,13 +63,15 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
 1. Clona el repositorio de github.
 2. Abre el compilador de tu maquina.
 3. Metete a la carpeta donde se encuentre los archivos
-4. Corre el archivo `M2_d_tree.py`.
-5. Ingresa la ruta donde se guardaron los archivos csv + `/filename.csv` con el cual se haran las pruebas.
-6. Espera que el rpograma finalice
+4. Corre el archivo `M2_d_tree.py` si quieres correr el archivo que NO utiliza libreraias.
+5. Corre el archivo `M2_d_treeFW.py` si quieres correr el archivo que utiliza libreraias.
+6. Ingresa la ruta donde se guardaron los archivos csv + `/filename.csv` con el cual se haran las pruebas.
+7. Espera que el programa finalice
 
 ## Googlecolab
-[Código en google colab](https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw?usp=sharing)
+[Arbol de decisiones SIN librerias](https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw?usp=sharing)
 
+[Arbol de decisiones CON librerias](https://colab.research.google.com/drive/1X1Hpuv5llX6TzEou8VtCqsp47ZTtvoy-?usp=sharing)
 
 ## Contribuciones
 
