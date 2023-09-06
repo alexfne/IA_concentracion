@@ -7,6 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1ULVWUYfqQ1DBGmIoFvlrfpiZaBXBoxQw
 
 [VIDEO BASE](https://www.youtube.com/watch?v=sgQAhG5Q7iY)
+
+### Importar librerias
+Se importan las bibliotecas necesarias como numpy, pandas y algunas funciones específicas de scikit-learn.
 """
 
 # Importando bibliotecas necesarias
@@ -17,7 +20,10 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import accuracy_score
 import matplotlib.pyplot as plt
 
-"""### Leer los datos"""
+"""### Leer los datos
+
+Se lee un archivo CSV y se muestran las primeras 10 filas para tener una visión preliminar.
+"""
 
 # Leer los datos
 filename = input('''Ingresa la ruta donde se encuentra el archivo + /filename.csv
@@ -30,7 +36,10 @@ data = pd.read_csv("iris.csv", skiprows=1, header=None)
 col_names = list(data.columns)
 data.head(10)
 
-"""### Clase de nodos"""
+"""### Clase de nodos
+
+Define la estructura básica de un nodo en el árbol de decisión. Puede ser un nodo de decisión (con un índice de característica y un umbral para tomar decisiones) o un nodo hoja (con un valor específico o etiqueta).
+"""
 
 # Definición de la clase Nodo para el árbol de decisión
 class Node():
@@ -49,7 +58,16 @@ class Node():
         # Propiedad para nodos hoja
         self.value = value
 
-"""### Clase de Arbol"""
+"""### Clase de Arbo
+
+Esto es esencialmente el corazón del algoritmo. Aquí se definen las funciones para:
+
+- Construir el árbol de decisión de forma recursiva.
+- Encontrar la mejor división en un conjunto de datos dado.
+- Realizar divisiones basadas en características y umbrales.
+- Calcular ganancia de información utilizando entropía o índice de Gini.
+- Hacer predicciones en nuevos datos.
+"""
 
 # Definición de la clase del Árbol de Decisión
 class DecisionTreeClassifier():
@@ -202,7 +220,10 @@ class DecisionTreeClassifier():
         else:
             return self.make_prediction(x, tree.right)
 
-"""### Train-Test"""
+"""### Train-Test
+
+Se divide el conjunto de datos Iris en entrenamiento y prueba usando scikit-learn.
+"""
 
 # Separar los datos en características y etiquetas
 X = data.iloc[:, :-1].values
@@ -212,7 +233,10 @@ Y = data.iloc[:, -1].values.reshape(-1,1)
 from sklearn.model_selection import train_test_split
 X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=.2, random_state=41)
 
-"""### Fit el modelo"""
+"""### Fit el modelo
+
+Se realiza una validación cruzada en varias profundidades de árbol para encontrar la profundidad óptima. Esto se visualiza en un gráfico que muestra la precisión media en función de la profundidad del árbol.
+"""
 
 # Inicializar y entrenar el clasificador del árbol de decisión
 classifier = DecisionTreeClassifier(min_samples_split=3, max_depth=3)
@@ -226,9 +250,9 @@ Y_pred = classifier.predict(X_test)
 from sklearn.metrics import accuracy_score
 accuracy_score(Y_test, Y_pred)
 
-"""### Validación cruzada y rendimiento
+"""### Métricas de validación
 
-Realiza una validación cruzada de 5 pliegues en diferentes profundidades de árbol y muestra un gráfico de la precisión media en función de la profundidad del árbol. Se visualiza cómo cambia el rendimiento del modelo con diferentes profundidades para seleccionar la mejor.
+Se calculan y visualizan diversas métricas de evaluación como la matriz de confusión, el informe de clasificación y, en caso de clasificación binaria, el AUC y la curva ROC.
 """
 
 # Definir k-fold cross-validation
@@ -298,3 +322,52 @@ if len(np.unique(Y_test)) == 2:  # Si es binario
     plt.title('Receiver Operating Characteristic (ROC)')
     plt.legend(loc="lower right")
     plt.show()
+
+"""### Curva de aprendizaje"""
+
+from sklearn.model_selection import learning_curve
+from sklearn.tree import DecisionTreeClassifier
+
+
+train_sizes, train_scores, val_scores = learning_curve(
+    DecisionTreeClassifier(min_samples_split=3, max_depth=3),
+    X, Y,
+    cv=5,
+    scoring='accuracy',
+    train_sizes=np.linspace(0.1, 1.0, 10)
+)
+
+train_mean = np.mean(train_scores, axis=1)
+train_std = np.std(train_scores, axis=1)
+val_mean = np.mean(val_scores, axis=1)
+val_std = np.std(val_scores, axis=1)
+
+plt.plot(train_sizes, train_mean, color='blue', marker='o', markersize=5, label='training accuracy')
+plt.fill_between(train_sizes, train_mean + train_std, train_mean - train_std, alpha=0.15, color='blue')
+
+plt.plot(train_sizes, val_mean, color='green', linestyle='--', marker='s', markersize=5, label='validation accuracy')
+plt.fill_between(train_sizes, val_mean + val_std, val_mean - val_std, alpha=0.15, color='green')
+
+plt.xlabel('Number of training samples')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+"""### Visualización del árbol"""
+
+from sklearn.tree import export_graphviz
+import graphviz
+
+# Entrena un árbol de decisión usando sklearn
+from sklearn.tree import DecisionTreeClassifier as SkDecisionTreeClassifier
+
+clf = SkDecisionTreeClassifier(max_depth=3)
+clf.fit(X_train, Y_train)
+
+dot_data = export_graphviz(clf, out_file=None,
+                           feature_names=col_names[:-1],
+                           class_names=np.unique(Y).astype(str),
+                           filled=True, rounded=True,
+                           special_characters=True)
+graph = graphviz.Source(dot_data)
+graph.view()
