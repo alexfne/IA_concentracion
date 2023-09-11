@@ -16,6 +16,7 @@
 - [Instalación](#instalación)
 - [Uso](#uso)
 - [GoogleColab](#googlecolab)
+- [GoogleDocs](#googledocs)
 - [Contribuciones](#contribuciones)
 
 ## Carpetas
@@ -77,7 +78,7 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
 
 [Arbol de decisiones CON librerias](https://colab.research.google.com/drive/1X1Hpuv5llX6TzEou8VtCqsp47ZTtvoy-?usp=sharing)
 
-## Google Docs
+## GoogleDocs
 [Documento de análisis](https://docs.google.com/document/d/1xOEZsdIWRwpkXSr6cq8LTBdSoYbpXzwa3TQurHZmDFQ/edit?usp=sharing)
 ## Contribuciones
 
