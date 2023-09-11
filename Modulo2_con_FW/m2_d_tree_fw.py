@@ -36,8 +36,15 @@ df = pd.read_csv(filename, skiprows=1, header=None)
 X = df.iloc[:, :-1].values
 y = df.iloc[:, -1].values
 
-# División del dataset en conjuntos de entrenamiento y prueba
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# División del dataset en conjuntos de entrenamiento y temporal (test + validación)
+X_train_temp, X_temp, y_train_temp, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# División del dataset en conjuntos de entrenamiento y temporal (test + validación)
+X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# División del conjunto temporal en conjuntos de prueba y validación
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+
 
 # Lista para almacenar métricas
 accuracies = []
@@ -100,4 +107,82 @@ plt.title('Curva de Aprendizaje')
 plt.xlabel('Tamaño del conjunto de entrenamiento')
 plt.ylabel('Accuracy')
 plt.legend()
+plt.show()
+
+"""### Grado de bias
+
+Se ha calculado el bias como la diferencia entre el accuracy ideal (1.0) y el accuracy promedio del conjunto de validación.
+
+#### Grado de varianza
+
+ Se calcula directamente como la varianza del accuracy en el conjunto de validación.
+"""
+
+# Cálculo del bias y varianza
+bias = 1 - np.mean(val_errors)
+variance = np.var(val_errors)
+
+def categorizar_medida(medida):
+    if medida < 0.1:
+        return "Bajo"
+    elif medida < 0.3:
+        return "Medio"
+    else:
+        return "Alto"
+
+bias_categoria = categorizar_medida(bias)
+varianza_categoria = categorizar_medida(variance)
+
+print(f"Grado de Bias (Sesgo): {bias:.4f} - {bias_categoria}")
+print(f"Grado de Varianza: {variance:.4f} - {varianza_categoria}")
+
+"""### Nivel de ajuste del modelo
+
+Se determina por las características generales de bias y varianza.
+
+1. Si ambos son altos, el modelo está underfitting y overfitting al mismo tiempo.
+2. Si solo el bias es alto, es underfitting.
+3. Si solo la varianza es alta, es overfitting.
+4. Si ambos son bajos, el modelo está equilibrado.
+"""
+
+if bias_categoria == "Alto" and varianza_categoria == "Alto":
+    print("El modelo presenta alto bias y alta varianza (underfitting y overfitting)")
+elif bias_categoria == "Alto":
+    print("El modelo presenta alto bias (underfitting)")
+elif varianza_categoria == "Alto":
+    print("El modelo presenta alta varianza (overfitting)")
+else:
+    print("El modelo tiene un buen equilibrio entre bias y varianza (fitt)")
+
+"""### Gráficas de SESGO, VARIANZA Y NIVEL DE AJUSTE"""
+
+# Gráficar Sesgo, Varianza y Nivel de Ajuste en subplots
+fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(8, 12))
+
+# Sesgo (Bias)
+bias_array = [1 - acc for acc in train_errors]
+ax[0].plot(range(1, len(train_errors) + 1), bias_array, label="Sesgo (1 - Train Accuracy)", color="blue")
+ax[0].set_title("Sesgo en función del tamaño del conjunto de entrenamiento")
+ax[0].set_xlabel("Tamaño del conjunto de entrenamiento")
+ax[0].set_ylabel("Sesgo")
+ax[0].legend()
+
+# Varianza
+variance_array = [val_errors[i] - train_errors[i] for i in range(len(val_errors))]
+ax[1].plot(range(1, len(val_errors) + 1), variance_array, label="Varianza", color="red")
+ax[1].set_title("Varianza en función del tamaño del conjunto de entrenamiento")
+ax[1].set_xlabel("Tamaño del conjunto de entrenamiento")
+ax[1].set_ylabel("Varianza")
+ax[1].legend()
+
+# Nivel de Ajuste (Overfitting/Underfitting)
+ax[2].plot(range(1, len(train_errors) + 1), train_errors, label="Train Accuracy", color="blue")
+ax[2].plot(range(1, len(val_errors) + 1), val_errors, label="Validation Accuracy", color="red")
+ax[2].set_title("Nivel de Ajuste en función del tamaño del conjunto de entrenamiento")
+ax[2].set_xlabel("Tamaño del conjunto de entrenamiento")
+ax[2].set_ylabel("Accuracy")
+ax[2].legend()
+
+plt.tight_layout()
 plt.show()
