@@ -77,6 +77,8 @@ Este repositorio contiene una implementación de un algoritmo de Machine Learnin
 
 [Arbol de decisiones CON librerias](https://colab.research.google.com/drive/1X1Hpuv5llX6TzEou8VtCqsp47ZTtvoy-?usp=sharing)
 
+## Google Docs
+[Documento de análisis](https://docs.google.com/document/d/1xOEZsdIWRwpkXSr6cq8LTBdSoYbpXzwa3TQurHZmDFQ/edit?usp=sharing)
 ## Contribuciones
 
 ¡Las contribuciones son bienvenidas! Si encuentras algún error o tienes alguna mejora, siéntete libre de abrir un problema o enviar una solicitud de extracción.
