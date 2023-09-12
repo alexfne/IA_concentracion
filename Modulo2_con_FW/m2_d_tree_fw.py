@@ -32,6 +32,9 @@ filename = input('''Ingresa la ruta donde se encuentra el archivo + /filename.cs
                  => ''')
 df = pd.read_csv(filename, skiprows=1, header=None)
 
+print("Muestra del dataset original:")
+print(df.head())
+
 # Extracción de características y etiquetas
 X = df.iloc[:, :-1].values
 y = df.iloc[:, -1].values
@@ -39,48 +42,39 @@ y = df.iloc[:, -1].values
 # División del dataset en conjuntos de entrenamiento y temporal (test + validación)
 X_train_temp, X_temp, y_train_temp, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# División del dataset en conjuntos de entrenamiento y temporal (test + validación)
-X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
-
 # División del conjunto temporal en conjuntos de prueba y validación
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
+# Visualizar la separación de los datos
+print("\nDatos de entrenamiento (primeras 5 filas):")
+print(X_train_temp[:5])
+print(y_train_temp[:5])
+print("\nDatos de validación (primeras 5 filas):")
+print(X_val[:5])
+print(y_val[:5])
+print("\nDatos de prueba (primeras 5 filas):")
+print(X_test[:5])
+print(y_test[:5])
 
 # Lista para almacenar métricas
-accuracies = []
+train_errors, val_errors, train_bias, test_bias = [], [], [], []
 
 # Entrenar el árbol incrementando su profundidad para ver cómo aprende
-for depth in range(1, 11):  # profundidad máxima del modelo de
-    # Inicializa y entrena el modelo
+for depth in range(1, 11):
     clf = DecisionTreeClassifier(max_depth=depth)
-    clf.fit(X_train, y_train)
+    clf.fit(X_train_temp, y_train_temp)
 
     # Realiza predicciones y calcula la precisión
-    y_pred = clf.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    accuracies.append(acc)
+    y_train_pred = clf.predict(X_train_temp)
+    y_test_pred = clf.predict(X_test)
+    train_accuracy = accuracy_score(y_train_temp, y_train_pred)
+    test_accuracy = accuracy_score(y_test, y_test_pred)
 
-    # Imprimir métricas
-    print(f"Profundidad: {depth}")
-    print(f"Accuracy: {acc:.2f}")
-    print(f"Precision: {precision_score(y_test, y_pred, average='weighted'):.2f}")
-    print(f"Recall: {recall_score(y_test, y_pred, average='weighted'):.2f}")
-    print(f"F1 Score: {f1_score(y_test, y_pred, average='weighted'):.2f}")
-
-    # Matriz de confusión y reporte de clasificación
-    print("Matriz de Confusión:")
-    print(confusion_matrix(y_test, y_pred))
-    print("\nReporte de Clasificación:")
-    print(classification_report(y_test, y_pred))
-    print("----------")
-
-# Gráfica de precisión en función de la profundidad del modelo
-plt.plot(range(1, 11), accuracies)
-plt.title('Accuracy en función de la profundidad del árbol')
-plt.xlabel('Profundidad')
-plt.ylabel('Accuracy')
-plt.xticks(range(1, 11))
-plt.show()
+    # Almacenar sesgo y error
+    train_errors.append(train_accuracy)
+    val_errors.append(test_accuracy)
+    train_bias.append(1 - train_accuracy)
+    test_bias.append(1 - test_accuracy)
 
 """### Visualización
 Muestra una gráfica de precisión (accuracy) en función de la profundidad del árbol para visualizar cómo va aprendiendo el modelo.
@@ -112,8 +106,29 @@ plt.show()
 """### Grado de bias
 
 Se ha calculado el bias como la diferencia entre el accuracy ideal (1.0) y el accuracy promedio del conjunto de validación.
+"""
 
-#### Grado de varianza
+# Gráficas de sesgo y precisión en función de la profundidad del árbol
+fig, ax = plt.subplots(2, 1, figsize=(10, 12))
+
+# Sesgo para el conjunto de entrenamiento
+ax[0].plot(range(1, len(train_bias) + 1), train_bias, label="Sesgo (1 - Train Accuracy)", color="blue")
+ax[0].set_title("Sesgo en función de la profundidad del árbol (Conjunto de Entrenamiento)")
+ax[0].set_xlabel("Profundidad del Árbol")
+ax[0].set_ylabel("Sesgo")
+ax[0].legend()
+
+# Sesgo para el conjunto de prueba
+ax[1].plot(range(1, len(test_bias) + 1), test_bias, label="Sesgo (1 - Test Accuracy)", color="red")
+ax[1].set_title("Sesgo en función de la profundidad del árbol (Conjunto de Prueba)")
+ax[1].set_xlabel("Profundidad del Árbol")
+ax[1].set_ylabel("Sesgo")
+ax[1].legend()
+
+plt.tight_layout()
+plt.show()
+
+"""#### Grado de varianza
 
  Se calcula directamente como la varianza del accuracy en el conjunto de validación.
 """
@@ -135,6 +150,24 @@ varianza_categoria = categorizar_medida(variance)
 
 print(f"Grado de Bias (Sesgo): {bias:.4f} - {bias_categoria}")
 print(f"Grado de Varianza: {variance:.4f} - {varianza_categoria}")
+
+"""### Gráfica del error para observar validación de la varianza"""
+
+# Gráfica de error de entrenamiento y validación en función de la profundidad del árbol
+plt.figure(figsize=(10, 6))
+
+# Error de entrenamiento y validación
+plt.plot(range(1, len(train_errors) + 1), [1 - acc for acc in train_errors], label="Error de Entrenamiento", color="blue")
+plt.plot(range(1, len(val_errors) + 1), [1 - acc for acc in val_errors], label="Error de Validación", color="red")
+
+# Configuración de la gráfica
+plt.title("Error en función de la profundidad del árbol")
+plt.xlabel("Profundidad del Árbol")
+plt.ylabel("Error")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
 
 """### Nivel de ajuste del modelo
 
@@ -185,4 +218,47 @@ ax[2].set_ylabel("Accuracy")
 ax[2].legend()
 
 plt.tight_layout()
+plt.show()
+
+"""### MEJORAS DEL MODELO"""
+
+# a. Ajuste de la profundidad máxima del árbol
+depths = list(range(1, 11))
+accuracies_depths = []
+
+for depth in depths:
+    clf = DecisionTreeClassifier(max_depth=depth)
+    clf.fit(X_train, y_train)
+    accuracies_depths.append(clf.score(X_val, y_val))
+
+plt.plot(depths, accuracies_depths, label="Accuracy según Profundidad")
+plt.xlabel('Profundidad del Árbol')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+# b. Uso de regularización (min_samples_leaf)
+samples_leaf = list(range(1, 20, 2))
+accuracies_samples = []
+
+for sample in samples_leaf:
+    clf = DecisionTreeClassifier(min_samples_leaf=sample)
+    clf.fit(X_train, y_train)
+    accuracies_samples.append(clf.score(X_val, y_val))
+
+plt.plot(samples_leaf, accuracies_samples, label="Accuracy según min_samples_leaf")
+plt.xlabel('Min_samples_leaf')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+# c. Uso de característica de importancia para la selección de características
+clf = DecisionTreeClassifier()
+clf.fit(X_train, y_train)
+importances = clf.feature_importances_
+indices = np.argsort(importances)[::-1]
+plt.bar(range(X_train.shape[1]), importances[indices])
+plt.xlabel('Características')
+plt.ylabel('Importancia')
+plt.title('Importancia de Características')
 plt.show()
